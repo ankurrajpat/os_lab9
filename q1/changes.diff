@@ -1,0 +1,172 @@
+diff -ruN xv6-orig/Makefile xv6-q1/Makefile
+--- xv6-orig/Makefile	2026-10-27 16:04:23.872270872 +0530
++++ xv6-q1/Makefile	2026-10-27 16:01:07.690768400 +0530
+@@ -181,6 +181,7 @@
+ 	_usertests\
+ 	_wc\
+ 	_zombie\
++	_pttest\
+ 
+ fs.img: mkfs README $(UPROGS)
+ 	./mkfs fs.img README $(UPROGS)
+@@ -249,7 +250,7 @@
+ 
+ EXTRA=\
+ 	mkfs.c ulib.c user.h cat.c echo.c forktest.c grep.c kill.c\
+-	ln.c ls.c mkdir.c rm.c stressfs.c usertests.c wc.c zombie.c\
++	ln.c ls.c mkdir.c rm.c stressfs.c usertests.c wc.c zombie.c pttest.c\
+ 	printf.c umalloc.c\
+ 	README dot-bochsrc *.pl toc.* runoff runoff1 runoff.list\
+ 	.gdbinit.tmpl gdbutil\
+diff -ruN xv6-orig/defs.h xv6-q1/defs.h
+--- xv6-orig/defs.h	2026-10-27 16:04:23.876270903 +0530
++++ xv6-q1/defs.h	2026-10-27 16:01:07.690768400 +0530
+@@ -175,6 +175,7 @@
+ void            kvmalloc(void);
+ pde_t*          setupkvm(void);
+ char*           uva2ka(pde_t*, char*);
++int             vmprint(void);   // Q1
+ int             allocuvm(pde_t*, uint, uint);
+ int             deallocuvm(pde_t*, uint, uint);
+ void            freevm(pde_t*);
+diff -ruN xv6-orig/pttest.c xv6-q1/pttest.c
+--- xv6-orig/pttest.c	1970-01-01 05:30:00.000000000 +0530
++++ xv6-q1/pttest.c	2026-10-27 16:01:07.690768400 +0530
+@@ -0,0 +1,28 @@
++// Q1: user test for the vmprint() system call.
++// Prints the page table at start-up and again after sbrk(4 * 4096);
++// exactly four new valid pages must appear.
++#include "types.h"
++#include "stat.h"
++#include "user.h"
++
++int
++main(void)
++{
++  int before, after;
++
++  printf(1, "=== vmprint at start-up ===\n");
++  before = vmprint();
++
++  sbrk(4 * 4096);
++
++  printf(1, "=== vmprint after sbrk(4 * 4096) ===\n");
++  after = vmprint();
++
++  printf(1, "pages before = %d, after = %d, new pages = %d\n",
++         before, after, after - before);
++  if(after - before == 4)
++    printf(1, "PASS: exactly four new pages appeared\n");
++  else
++    printf(1, "FAIL\n");
++  exit();
++}
+diff -ruN xv6-orig/syscall.c xv6-q1/syscall.c
+--- xv6-orig/syscall.c	2026-10-27 16:04:23.876270903 +0530
++++ xv6-q1/syscall.c	2026-10-27 16:01:07.690768400 +0530
+@@ -103,6 +103,7 @@
+ extern int sys_wait(void);
+ extern int sys_write(void);
+ extern int sys_uptime(void);
++extern int sys_vmprint(void);   // Q1
+ 
+ static int (*syscalls[])(void) = {
+ [SYS_fork]    sys_fork,
+@@ -119,6 +120,7 @@
+ [SYS_sbrk]    sys_sbrk,
+ [SYS_sleep]   sys_sleep,
+ [SYS_uptime]  sys_uptime,
++[SYS_vmprint] sys_vmprint,   // Q1
+ [SYS_open]    sys_open,
+ [SYS_write]   sys_write,
+ [SYS_mknod]   sys_mknod,
+diff -ruN xv6-orig/syscall.h xv6-q1/syscall.h
+--- xv6-orig/syscall.h	2026-10-27 16:04:23.876270903 +0530
++++ xv6-q1/syscall.h	2026-10-27 16:01:07.690768400 +0530
+@@ -20,3 +20,4 @@
+ #define SYS_link   19
+ #define SYS_mkdir  20
+ #define SYS_close  21
++#define SYS_vmprint 22   // Q1: print page table of calling process
+diff -ruN xv6-orig/sysproc.c xv6-q1/sysproc.c
+--- xv6-orig/sysproc.c	2026-10-27 16:04:23.876270903 +0530
++++ xv6-q1/sysproc.c	2026-10-27 16:01:07.690768400 +0530
+@@ -42,6 +42,13 @@
+   return myproc()->pid;
+ }
+ 
++// Q1: system call wrapper for vmprint() (implemented in vm.c)
++int
++sys_vmprint(void)
++{
++  return vmprint();
++}
++
+ int
+ sys_sbrk(void)
+ {
+diff -ruN xv6-orig/user.h xv6-q1/user.h
+--- xv6-orig/user.h	2026-10-27 16:04:23.876270903 +0530
++++ xv6-q1/user.h	2026-10-27 16:01:07.690768400 +0530
+@@ -23,6 +23,7 @@
+ char* sbrk(int);
+ int sleep(int);
+ int uptime(void);
++int vmprint(void);   // Q1: print page table of calling process
+ 
+ // ulib.c
+ int stat(const char*, struct stat*);
+diff -ruN xv6-orig/usys.S xv6-q1/usys.S
+--- xv6-orig/usys.S	2026-10-27 16:04:23.876270903 +0530
++++ xv6-q1/usys.S	2026-10-27 16:01:07.690768400 +0530
+@@ -29,3 +29,4 @@
+ SYSCALL(sbrk)
+ SYSCALL(sleep)
+ SYSCALL(uptime)
++SYSCALL(vmprint)   # Q1
+diff -ruN xv6-orig/vm.c xv6-q1/vm.c
+--- xv6-orig/vm.c	2026-10-27 16:04:23.876270903 +0530
++++ xv6-q1/vm.c	2026-10-27 16:01:07.690768400 +0530
+@@ -392,3 +392,42 @@
+ //PAGEBREAK!
+ // Blank page.
+ 
++
++// Q1: print the page table of the calling process.
++// Walks the page directory the same way freevm() does (over all PDEs) but
++// only looks at the user part of the address space (< KERNBASE).
++// For every valid (PTE_P) user page prints: virtual address, physical
++// address of the frame, and the flags P, W, U (1 = set, 0 = clear).
++// At the end prints the number of valid user pages and the number of
++// page-table pages (second-level tables) plus the page directory itself.
++int
++vmprint(void)
++{
++  pde_t *pgdir = myproc()->pgdir;
++  pte_t *pgtab, *pte;
++  uint i, j, va;
++  int npages = 0, nptpages = 0;
++
++  cprintf("page table of pid %d (%s)\n", myproc()->pid, myproc()->name);
++  cprintf("  VA          PA          P W U\n");
++  for(i = 0; i < PDX(KERNBASE); i++){       // user part only
++    if(!(pgdir[i] & PTE_P))
++      continue;
++    nptpages++;                              // one second-level table
++    pgtab = (pte_t*)P2V(PTE_ADDR(pgdir[i]));
++    for(j = 0; j < NPTENTRIES; j++){
++      pte = &pgtab[j];
++      if(!(*pte & PTE_P))
++        continue;
++      va = (i << PDXSHIFT) | (j << PTXSHIFT);
++      cprintf("  0x%x  0x%x  %d %d %d\n", va, PTE_ADDR(*pte),
++              (*pte & PTE_P) ? 1 : 0, (*pte & PTE_W) ? 1 : 0,
++              (*pte & PTE_U) ? 1 : 0);
++      npages++;
++    }
++  }
++  cprintf("valid user pages: %d\n", npages);
++  cprintf("page-table pages: %d second-level + 1 page directory = %d\n",
++          nptpages, nptpages + 1);
++  return npages;
++}
