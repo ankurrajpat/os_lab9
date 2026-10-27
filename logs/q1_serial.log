@@ -1,0 +1,29 @@
+c[?7l[2J[0mSeaBIOS (version 1.15.0-1)
+Booting from Hard Disk..xv6...
+cpu0: starting 0
+sb: size 1000 nblocks 941 ninodes 200 nlog 30 logstart 2 inodestart 32 bmap start 58
+init: starting sh
+$ pttest
+=== vmprint at start-up ===
+page table of pid 3 (pttest)
+  VA          PA          P W U
+  0x0  0xdee2000  1 1 1
+  0x1000  0xdee0000  1 1 0
+  0x2000  0xdedf000  1 1 1
+valid user pages: 3
+page-table pages: 1 second-level + 1 page directory = 2
+=== vmprint after sbrk(4 * 4096) ===
+page table of pid 3 (pttest)
+  VA          PA          P W U
+  0x0  0xdee2000  1 1 1
+  0x1000  0xdee0000  1 1 0
+  0x2000  0xdedf000  1 1 1
+  0x3000  0xdfbc000  1 1 1
+  0x4000  0xdf76000  1 1 1
+  0x5000  0xdfbf000  1 1 1
+  0x6000  0xdfc0000  1 1 1
+valid user pages: 7
+page-table pages: 1 second-level + 1 page directory = 2
+pages before = 3, after = 7, new pages = 4
+PASS: exactly four new pages appeared
+$ 

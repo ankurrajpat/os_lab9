@@ -1,0 +1,103 @@
+c[?7l[2J[0mSeaBIOS (version 1.15.0-1)
+Booting from Hard Disk..xv6...
+cpu0: starting 0
+sb: size 1000 nblocks 941 ninodes 200 nlog 30 logstart 2 inodestart 32 bmap start 58
+init: starting sh
+$ faulttest
+faults at start: 0
+sbrk(32*4096) done, faults so far: 0 (expected 0)
+wrote page 0 (addr 0x3000), faults = 1
+wrote page 3 (addr 0x6000), faults = 2
+wrote page 7 (addr 0xA000), faults = 3
+wrote page 15 (addr 0x12000), faults = 4
+wrote page 31 (addr 0x22000), faults = 5
+page faults handled: 5
+PASS: exactly 5 faults
+child: touching invalid address 0x2D000
+pid 4: page fault at invalid address 0x2d000 -- killing process
+parent: child was killed, parent still running
+parent: done, faults = 5
+$ usertests
+usertests starting
+arg test passed
+createdelete test
+createdelete ok
+linkunlink test
+linkunlink ok
+concreate test
+concreate ok
+fourfiles test
+fourfiles ok
+sharedfd test
+sharedfd ok
+bigarg test
+bigarg test ok
+bigwrite test
+bigwrite ok
+bigarg test
+bigarg test ok
+bss test
+bss test ok
+sbrk test
+pid 99: page fault at invalid address 0x80000000 -- killing process
+pid 100: page fault at invalid address 0x8000c350 -- killing process
+pid 101: page fault at invalid address 0x800186a0 -- killing process
+pid 102: page fault at invalid address 0x800249f0 -- killing process
+pid 103: page fault at invalid address 0x80030d40 -- killing process
+pid 104: page fault at invalid address 0x8003d090 -- killing process
+pid 105: page fault at invalid address 0x800493e0 -- killing process
+pid 106: page fault at invalid address 0x80055730 -- killing process
+pid 107: page fault at invalid address 0x80061a80 -- killing process
+pid 108: page fault at invalid address 0x8006ddd0 -- killing process
+pid 109: page fault at invalid address 0x8007a120 -- killing process
+pid 110: page fault at invalid address 0x80086470 -- killing process
+pid 111: page fault at invalid address 0x800927c0 -- killing process
+pid 112: page fault at invalid address 0x8009eb10 -- killing process
+pid 113: page fault at invalid address 0x800aae60 -- killing process
+pid 114: page fault at invalid address 0x800b71b0 -- killing process
+pid 115: page fault at invalid address 0x800c3500 -- killing process
+pid 116: page fault at invalid address 0x800cf850 -- killing process
+pid 117: page fault at invalid address 0x800dbba0 -- killing process
+pid 118: page fault at invalid address 0x800e7ef0 -- killing process
+pid 119: page fault at invalid address 0x800f4240 -- killing process
+pid 120: page fault at invalid address 0x80100590 -- killing process
+pid 121: page fault at invalid address 0x8010c8e0 -- killing process
+pid 122: page fault at invalid address 0x80118c30 -- killing process
+pid 123: page fault at invalid address 0x80124f80 -- killing process
+pid 124: page fault at invalid address 0x801312d0 -- killing process
+pid 125: page fault at invalid address 0x8013d620 -- killing process
+pid 126: page fault at invalid address 0x80149970 -- killing process
+pid 127: page fault at invalid address 0x80155cc0 -- killing process
+pid 128: page fault at invalid address 0x80162010 -- killing process
+pid 129: page fault at invalid address 0x8016e360 -- killing process
+pid 130: page fault at invalid address 0x8017a6b0 -- killing process
+pid 131: page fault at invalid address 0x80186a00 -- killing process
+pid 132: page fault at invalid address 0x80192d50 -- killing process
+pid 133: page fault at invalid address 0x8019f0a0 -- killing process
+pid 134: page fault at invalid address 0x801ab3f0 -- killing process
+pid 135: page fault at invalid address 0x801b7740 -- killing process
+pid 136: page fault at invalid address 0x801c3a90 -- killing process
+pid 137: page fault at invalid address 0x801cfde0 -- killing process
+pid 138: page fault at invalid address 0x801dc130 -- killing process
+sbrk test OK
+validate test
+validate ok
+open test
+open test ok
+small file test
+creat small succeeded; ok
+writes ok
+open small succeeded ok
+read succeeded ok
+small file test ok
+big files test
+big files ok
+many creates, followed by unlink test
+many creates, followed by unlink; ok
+openiput test
+openiput test ok
+exitiput test
+exitiput test ok
+iput test
+iput test ok
+mem test
